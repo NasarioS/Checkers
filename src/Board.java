@@ -7,7 +7,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 public class Board extends Application{
 	//8x8 grid with each title size being 100px
-	public static final int TILE_SIZE = 75;
+	public static final int TILE_SIZE =75;
 	public static final int WIDTH = 8;
 	public static final int HIGHT = 8;
 	
