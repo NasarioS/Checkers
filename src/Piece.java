@@ -7,12 +7,15 @@ public class Piece extends Ellipse {
 	private double mouseX, mouseY;
 	private double oldX, oldY;
 	
-
+	public PieceInfo getInfo() { return this.piece; } 
+	public double getOldX() { return oldX; }
+	public double getOldY() { return oldY; }
+	
 	Piece(PieceInfo piece, int x, int y){
 		this.piece = piece;
 		// 0.314 is the rel rad to the tile size
 		this.setRadiusX(Board.TILE_SIZE * 0.314); 
-		this.setRadiusY (Board.TILE_SIZE * 0.314);
+		this.setRadiusY(Board.TILE_SIZE * 0.314);
 		
 		move(x,y);
 		
@@ -32,12 +35,11 @@ public class Piece extends Ellipse {
 		
 		setOnMousePressed(e -> {
 			this.mouseX = e.getScreenX();
-			this.mouseY = e.getSceneY();
+			this.mouseY = e.getScreenY();
 			
-			System.out.println(this.toString() + " Piece Place on Board: (" + this.oldX/Board.TILE_SIZE + ", " + this.oldY/Board.TILE_SIZE + ").");
-		});
+		}); 
 		setOnMouseDragged( e->{
-			
+			relocate(e.getScreenX() - this.mouseX + this.oldX, e.getScreenY() - this.mouseY + this.oldY);
 		});
 	}
 	private void move(int x, int y) {
