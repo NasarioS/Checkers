@@ -10,7 +10,7 @@ public class Board extends Application{
 	public static final int TILE_SIZE =75;
 	public static final int WIDTH = 8;
 	public static final int HIGHT = 8;
-	
+	private Tile[][] board  = new Tile[WIDTH][HIGHT];
 	private Group pGroup = new Group();
 	private Group tGroup = new Group();
 	
@@ -22,15 +22,16 @@ public class Board extends Application{
 		for(int i = 0; i < WIDTH;i++) {
 			for(int j = 0; j < HIGHT; j++) {
 				Tile tile = new Tile((i+j)%2 == 0, i,j);
+				board[i][j] = tile;
 				tGroup.getChildren().add(tile);
 				
 				Piece p = null;
 				//if y is less than 3 and the tile is odd place a red piece
 				if(j < 3 && (i+j)%2 == 1 ) {
-					p = new Piece(PieceInfo.RED, i, j);
+					p = makePiece(PieceInfo.RED, i, j);
 				}
-				if(j > 5 && (i+j)%2 == 1) {
-					p = new Piece(PieceInfo.WHITE, i, j);
+				if(j > 4 && (i+j)%2 == 1) {
+					p = makePiece(PieceInfo.WHITE, i, j);
 				}
 				
 				if(p != null) {
@@ -42,6 +43,71 @@ public class Board extends Application{
 		}
 		
 		return root;
+	}
+	
+	
+	private Piece makePiece(PieceInfo i, int x, int y) {
+		Piece p = new Piece(i , x , y);
+		p.setOnMouseReleased(e -> {
+			int newX = fromPixel(p.getLayoutX());
+			int newY = fromPixel(p.getLayoutY());
+			
+			int xS = fromPixel(p.getOldX());
+			int yS = fromPixel(p.getOldY());
+			
+			CanMove result = tryMove(p, newX, newY);
+			
+			switch(result.getInfo()) {
+			case NO: 
+				p.stopMove();
+				break;
+			case YES: 
+				p.move(newX, newY);
+				board[xS][yS].setPiece(null);
+				board[newX][newY].setPiece(p);
+				break;
+			case EAT: 
+				p.move(newX, newY);
+				board[xS][yS].setPiece(null);
+				board[newX][newY].setPiece(p);
+				
+				Piece other =  result.getPiece();
+				board[fromPixel(other.getOldX())][fromPixel(other.getOldY())].setPiece(null);
+				pGroup.getChildren().remove(other);
+				break;
+			}
+		});
+		return p;
+	}
+	//x and y of location to move too the check if can move there
+	private CanMove tryMove(Piece p, int newX, int newY) {
+		//test if it was a piece or is a white tile
+		if((newX + newY)%2 == 0 || board[newX][newY].hasPiece()) {
+			System.out.println("No Move Start");
+			return new CanMove(MoveInfo.NO);
+		}
+		
+		//board x and y of old location
+		int bX = fromPixel(p.getOldX());
+		int bY = fromPixel(p.getOldY());
+		
+		if(Math.abs(bX - newX) == 1 && bY - newY == p.getInfo().move) {
+			return new CanMove(MoveInfo.YES);
+		}
+		if(Math.abs(newX - bX ) == 2 && bY - newY == (p.getInfo().move * 2)){
+			int middleX = bX + (newX - bX) /2;
+			int middleY = bY + (newY - bY) /2;
+			if(board[middleX][middleY].hasPiece() && board[middleX][middleY].getPiece().getInfo() != p.getInfo()) {
+				return new CanMove(MoveInfo.EAT, board[middleX][middleY].getPiece());
+			}
+		}
+		return new CanMove(MoveInfo.NO);
+	}
+	
+	private int fromPixel(double x) {
+		// by dividing the pixel by TILE_SIZE and casting to an int, will provide
+		// the tile cord on the board
+		return (int) (x / TILE_SIZE);
 	}
 	@Override
 	public void start(Stage primaryStage) throws Exception {
