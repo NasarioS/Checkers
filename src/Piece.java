@@ -42,12 +42,16 @@ public class Piece extends Ellipse {
 			relocate(e.getScreenX() - this.mouseX + this.oldX, e.getScreenY() - this.mouseY + this.oldY);
 		});
 	}
-	private void move(int x, int y) {
+	public void move(int x, int y) {
 		this.oldX = (Board.TILE_SIZE * x);
 		this.oldY = (Board.TILE_SIZE * y);
 		this.relocate(this.oldX, this.oldY);
 	}
 	public String toString() {
 		return this.piece.toString();
+	}
+	
+	void stopMove() {
+		relocate(oldX, oldY);
 	}
 }
