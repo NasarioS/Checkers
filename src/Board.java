@@ -11,6 +11,7 @@ public class Board extends Application{
 	public static final int WIDTH = 8;
 	public static final int HIGHT = 8;
 	private Tile[][] board  = new Tile[WIDTH][HIGHT];
+	private int turn = 1;
 	private Group pGroup = new Group();
 	private Group tGroup = new Group();
 	
@@ -28,10 +29,12 @@ public class Board extends Application{
 				Piece p = null;
 				//if y is less than 3 and the tile is odd place a red piece
 				if(j < 3 && (i+j)%2 == 1 ) {
-					p = makePiece(PieceInfo.RED, i, j);
+					p = makePiece(PieceInfo.WHITE, i, j);
+					board[i][j].setPiece(p);
 				}
 				if(j > 4 && (i+j)%2 == 1) {
-					p = makePiece(PieceInfo.WHITE, i, j);
+					p = makePiece(PieceInfo.RED, i, j);
+					board[i][j].setPiece(p);
 				}
 				
 				if(p != null) {
@@ -82,8 +85,11 @@ public class Board extends Application{
 	//x and y of location to move too the check if can move there
 	private CanMove tryMove(Piece p, int newX, int newY) {
 		//test if it was a piece or is a white tile
+		if(turn == p.getInfo().move) {
+			return new CanMove(MoveInfo.NO);
+		}
 		if((newX + newY)%2 == 0 || board[newX][newY].hasPiece()) {
-			System.out.println("No Move Start");
+			System.out.println(newX + " " + newY);
 			return new CanMove(MoveInfo.NO);
 		}
 		
@@ -91,23 +97,37 @@ public class Board extends Application{
 		int bX = fromPixel(p.getOldX());
 		int bY = fromPixel(p.getOldY());
 		
-		if(Math.abs(bX - newX) == 1 && bY - newY == p.getInfo().move) {
+		if(Math.abs(bX - newX) == 1 && (bY - newY == p.getInfo().move || p.getKing())) {
+			if(turn == 1)
+				turn += -2;
+			else
+				turn += 2;
+			if(!p.getKing() && (p.getInfo()== PieceInfo.WHITE && newY == 0 || p.getInfo()== PieceInfo.RED && newY == 7))
+				p.setKing();
 			return new CanMove(MoveInfo.YES);
 		}
-		if(Math.abs(newX - bX ) == 2 && bY - newY == (p.getInfo().move * 2)){
+		if(Math.abs(newX - bX ) == 2 && (bY - newY == (p.getInfo().move * 2) || p.getKing())){
 			int middleX = bX + (newX - bX) /2;
 			int middleY = bY + (newY - bY) /2;
 			if(board[middleX][middleY].hasPiece() && board[middleX][middleY].getPiece().getInfo() != p.getInfo()) {
+				if(turn == 1) 
+					turn += -2;
+				else
+					turn += 2;
+				if(!p.getKing() && (p.getInfo()== PieceInfo.WHITE && newY == 0 || p.getInfo()== PieceInfo.RED && newY == 7))
+					p.setKing();
 				return new CanMove(MoveInfo.EAT, board[middleX][middleY].getPiece());
 			}
 		}
+		System.out.println("(x,y): (" + bX + ", " + bY + ")");
+		System.out.println("(new x, new y): (" + newX + ", " + newY + ")");
 		return new CanMove(MoveInfo.NO);
 	}
 	
 	private int fromPixel(double x) {
 		// by dividing the pixel by TILE_SIZE and casting to an int, will provide
 		// the tile cord on the board
-		return (int) (x / TILE_SIZE);
+		return (int) ((x + TILE_SIZE/2)/TILE_SIZE);
 	}
 	@Override
 	public void start(Stage primaryStage) throws Exception {

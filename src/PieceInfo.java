@@ -5,5 +5,6 @@ public enum PieceInfo {
   PieceInfo(int move){
 	  this.move = move;
   }
+
 }
 

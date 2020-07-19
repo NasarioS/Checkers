@@ -1,33 +1,38 @@
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
+import javafx.scene.text.Text;
 
-public class Piece extends Ellipse {
+public class Piece extends StackPane {
 	private PieceInfo piece;
-	
+	private boolean king;
 	private double mouseX, mouseY;
 	private double oldX, oldY;
 	
 	public PieceInfo getInfo() { return this.piece; } 
 	public double getOldX() { return oldX; }
 	public double getOldY() { return oldY; }
+	public boolean getKing() { return king; }
 	
 	Piece(PieceInfo piece, int x, int y){
+		king = false;
 		this.piece = piece;
+		//btm is the bottom of the stack
+		Ellipse btm = new Ellipse(Board.TILE_SIZE * 0.314, Board.TILE_SIZE * 0.314);
 		// 0.314 is the rel rad to the tile size
-		this.setRadiusX(Board.TILE_SIZE * 0.314); 
-		this.setRadiusY(Board.TILE_SIZE * 0.314);
+		
 		
 		move(x,y);
 		
 		if(piece == PieceInfo.RED) {
-			this.setFill(Color.RED);
+			btm.setFill(Color.RED);
 		}
 		else {
-			this.setFill(Color.WHITE);
+			btm.setFill(Color.WHITE);
 		}
 	
-		this.setStroke(Color.GREY);
-		this.setStrokeWidth(Board.TILE_SIZE * .05);
+		btm.setStroke(Color.GREY);
+		btm.setStrokeWidth(Board.TILE_SIZE * .05);
 		//centering piece in square
 		//trial and error dividing by 6 nearly centers the piece
 		this.setTranslateX(Board.TILE_SIZE / 6);
@@ -41,6 +46,8 @@ public class Piece extends Ellipse {
 		setOnMouseDragged( e->{
 			relocate(e.getScreenX() - this.mouseX + this.oldX, e.getScreenY() - this.mouseY + this.oldY);
 		});
+		
+		this.getChildren().add(btm);
 	}
 	public void move(int x, int y) {
 		this.oldX = (Board.TILE_SIZE * x);
@@ -51,7 +58,13 @@ public class Piece extends Ellipse {
 		return this.piece.toString();
 	}
 	
-	void stopMove() {
+	public void stopMove() {
 		relocate(oldX, oldY);
+	}
+	public void setKing() {
+		if(!king) {
+			king = true;
+			this.getChildren().add(new Text("KING"));
+		}
 	}
 }
