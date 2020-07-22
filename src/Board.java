@@ -16,24 +16,32 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 public class Board extends Application{
-	//8x8 grid with each title size being 75px
+	//8x8 grid with each title size being 75px, everything is it be relative based on Tile size and the number of tiles (8x8 board) 
 	public static final int TILE_SIZE = 75;
 	public static final int WIDTH = 8;
 	public static final int HEIGHT = 8;
+	public static final int NUMOFPIECES = 12;
+	//create an empty the board
 	private Tile[][] board  = new Tile[WIDTH][HEIGHT];
+	
 	private int turn = 1;
+	//tile and piece groups
 	private Group pGroup = new Group();
 	private Group tGroup = new Group();
 	private Pane root = new Pane();
 	private int redP, blackP;
 	private Text playerColor;
+	
 	private Scene menu, scene, endGame;
 	private Stage stage;
 	
-	private Button createContent() {
+	// when ran you are greeted with a short description of the game.
+	private Button createContent() { 
+	// root will be the main game, so we create the size of the board
 	root.setPrefSize(WIDTH * TILE_SIZE + TILE_SIZE, HEIGHT * TILE_SIZE);
 	Button b = new Button("This Is a 2 Player Cherckers Game\nClick Me to Begin!");
 	b.setTextAlignment(TextAlignment.CENTER);
+	// this is where we start the game  
 	b.setOnAction(e -> {
 		root.getChildren().clear();
 		createGame();
@@ -41,10 +49,11 @@ public class Board extends Application{
 	root.getChildren().add(b);
 	return b;
 }
-
+	// this will create the game, add pieces to the board and initialize the numbers of pieces each color will have
 	private Parent createGame() {
-		redP = 12;
-		blackP = 12;
+		redP = NUMOFPIECES;
+		blackP = NUMOFPIECES;
+		// we the next few lines to visual track the turn for the players, it is also color coated
 		Text turnp = new Text(WIDTH * TILE_SIZE, 15, "Turn:");
 		playerColor = new Text(WIDTH * TILE_SIZE+30, 15, "RED");
 		playerColor.setFont(Font.font("Impact", FontWeight.BOLD, 12));
@@ -67,16 +76,17 @@ public class Board extends Application{
 				tGroup.getChildren().add(tile);
 				
 				Piece p = null;
-				//if y is less than 3 and the tile is odd place a red piece
+				//if y is less than 3 and the tile is odd place a black piece
 				if(j < 3 && (i+j)%2 == 1 ) {
 					p = makePiece(PieceInfo.BLACK, i, j);
 					board[i][j].setPiece(p);
 				}
+				//if y is grater than 4 and the tile is odd place a red piece
 				if(j > 4 && (i+j)%2 == 1) {
 					p = makePiece(PieceInfo.RED, i, j);
 					board[i][j].setPiece(p);
 				}
-				
+				// if the we added a piece add it to the group
 				if(p != null) {
 					pGroup.getChildren().add(p);
 				}
@@ -88,17 +98,18 @@ public class Board extends Application{
 		
 		return root;
 	}
-	
+	// a game menu, it replaces the current scene
 	private void GameMenu() {
 		Button yes = new Button("Yes");
 		Button no = new Button ("No");
-		Text newGameText = new Text("Are You Sure \nYou Want To Start a New Game?");
+		Text newGameText = new Text("Are You Sure \nYou Want To Start a New Game?\n (Note:Exiting this Screen Will Close The Game");
 		
 
 		Pane menuPane = new Pane();
 		menu = new Scene(menuPane);
 		menuPane.getChildren().addAll(yes,no, newGameText);
-		menuPane.setPrefSize(WIDTH*TILE_SIZE/2, HEIGHT*TILE_SIZE/4);
+		//the size of the new screen is only a 1\4 of the original
+		menuPane.setPrefSize(WIDTH*TILE_SIZE/4, HEIGHT*TILE_SIZE/4);
 		stage.setScene(menu);
 		stage.show();
 		newGameText.setTextAlignment(TextAlignment.CENTER);
@@ -110,7 +121,7 @@ public class Board extends Application{
 		
 		no.setLayoutX(WIDTH*TILE_SIZE/4 + 5);
 		no.setLayoutY(TILE_SIZE/2);
-		
+		// completely remove everything and create a new board the make an new game
 		yes.setOnAction(e->{
 			root.getChildren().removeAll();
 			root.getChildren().clear();
@@ -130,6 +141,7 @@ public class Board extends Application{
 			stage.setScene(scene);
 		});
 	}
+	// make a piece and create the handling for trying to move 
 	private Piece makePiece(PieceInfo i, int x, int y) {
 		Piece p = new Piece(i , x , y);
 		p.setOnMouseReleased(e -> {
@@ -171,9 +183,9 @@ public class Board extends Application{
 		return p;
 	}
 
-	//x and y of location to move too the check if can move there
+	// check to see if a move is a legal move, if so move will handle the outcome
 	private CanMove tryMove(Piece p, int newX, int newY) {
-		//test if it was a piece or is a white tile
+	
 		if(turn == p.getInfo().move) {
 			return new CanMove(MoveInfo.NO);
 		}
@@ -195,6 +207,7 @@ public class Board extends Application{
 				playerColor.setFill(Color.RED);
 				turn += 2;
 			}
+			
 			if(!p.getKing() && (p.getInfo() == PieceInfo.BLACK && newY == 7 || p.getInfo()== PieceInfo.RED && newY == 0))
 				p.setKing();
 			return new CanMove(MoveInfo.YES);
@@ -221,6 +234,7 @@ public class Board extends Application{
 		return new CanMove(MoveInfo.NO);
 	}
 	
+	//create the game over screen when there are no more pieces of a single color
 	private void gameOver() {
 		Pane p = new Pane();
 		p.setPrefSize(WIDTH*TILE_SIZE/2, HEIGHT*TILE_SIZE/4);
@@ -276,7 +290,7 @@ public class Board extends Application{
 			red.setLayoutX(WIDTH * TILE_SIZE/4 - red.getLayoutBounds().getWidth()/ 2);
 		}
 	}
-	
+	//converts Pixel measurements to Board Cords
 	private int fromPixel(double x) {
 		// by dividing the pixel by TILE_SIZE and casting to an int, will provide
 		// the tile cord on the board

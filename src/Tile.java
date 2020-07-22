@@ -1,6 +1,6 @@
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-
+// visual for tiles on the board
 public class Tile extends Rectangle {
 	private Piece p;
 	public boolean hasPiece() {

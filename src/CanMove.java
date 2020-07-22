@@ -1,4 +1,4 @@
-
+// helper class for checking movements, we will only access MoveInfo.java from here
 public class CanMove {
 	private MoveInfo moveInfo;
 	private Piece p;
