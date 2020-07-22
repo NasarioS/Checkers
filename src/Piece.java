@@ -28,7 +28,7 @@ public class Piece extends StackPane {
 			btm.setFill(Color.RED);
 		}
 		else {
-			btm.setFill(Color.WHITE);
+			btm.setFill(Color.BLACK);
 		}
 	
 		btm.setStroke(Color.GREY);
@@ -64,7 +64,10 @@ public class Piece extends StackPane {
 	public void setKing() {
 		if(!king) {
 			king = true;
-			this.getChildren().add(new Text("KING"));
+			Text text = new Text("KING");
+			if(this.getInfo() == PieceInfo.BLACK)
+				text.setFill(Color.RED);
+			this.getChildren().add(text);
 		}
 	}
 }
